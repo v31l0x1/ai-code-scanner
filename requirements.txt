@@ -7,3 +7,9 @@ Werkzeug==3.0.1
 Jinja2==3.1.2
 pathspec==0.11.2
 requests==2.31.0
+pyotp
+qrcode[pil]
+werkzeug
+flask-limiter
+flask-session
+flask-wtf
