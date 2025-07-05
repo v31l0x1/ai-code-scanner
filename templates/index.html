@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}AI Code Scanner - Security Vulnerability Detection{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary">
+                    <i class="fas fa-shield-alt"></i> AI Code Scanner
+                </h1>
+                <p class="lead">Detect OWASP Top 10 vulnerabilities in your code using AI-powered analysis</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-code"></i> Paste Your Code
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('scan_code') }}" id="codeForm">
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Enter your code here:</label>
+                            <textarea class="form-control code-editor" id="code" name="code" rows="15" 
+                                      placeholder="Paste your code here for vulnerability analysis..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search"></i> Scan Code
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-upload"></i> Upload File
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                            <h5>Drop your file here or click to browse</h5>
+                            <p class="text-muted">Supported formats: .py, .js, .java, .php, .cs, .cpp, .html, .sql and more</p>
+                            <input type="file" class="form-control" id="file" name="file" accept=".py,.js,.jsx,.ts,.tsx,.java,.php,.rb,.go,.cs,.cpp,.c,.h,.hpp,.sql,.html,.xml,.json,.yaml,.yml,.sh,.bash,.ps1,.jsp,.asp,.aspx" style="display: none;">
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100 mt-3">
+                            <i class="fas fa-upload"></i> Upload & Scan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="stats-card">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-chart-bar"></i> OWASP Top 10 Detection Capabilities
+                </h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A01:2021 – Broken Access Control</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A02:2021 – Cryptographic Failures</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A03:2021 – Injection</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A04:2021 – Insecure Design</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A05:2021 – Security Misconfiguration</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A06:2021 – Vulnerable and Outdated Components</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A07:2021 – Identification and Authentication Failures</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A08:2021 – Software and Data Integrity Failures</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A09:2021 – Security Logging and Monitoring Failures</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A10:2021 – Server-Side Request Forgery (SSRF)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loadingDiv">
+        <div class="spinner"></div>
+        <h5>Analyzing your code for vulnerabilities...</h5>
+        <p class="text-muted">This may take a few seconds</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('file');
+    const codeForm = document.getElementById('codeForm');
+    const uploadForm = document.getElementById('uploadForm');
+    const loadingDiv = document.getElementById('loadingDiv');
+
+    // File upload drag and drop
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateUploadAreaText(files[0].name);
+        }
+    });
+
+    fileInput.addEventListener('change', function() {
+        if (fileInput.files.length > 0) {
+            updateUploadAreaText(fileInput.files[0].name);
+        }
+    });
+
+    function updateUploadAreaText(filename) {
+        uploadArea.innerHTML = `
+            <i class="fas fa-file-code fa-3x mb-3 text-primary"></i>
+            <h5>File Selected: ${filename}</h5>
+            <p class="text-muted">Click to select a different file</p>
+        `;
+    }
+
+    // Show loading on form submission
+    codeForm.addEventListener('submit', function() {
+        const code = document.getElementById('code').value.trim();
+        if (code) {
+            showLoading();
+        }
+    });
+
+    uploadForm.addEventListener('submit', function() {
+        if (fileInput.files.length > 0) {
+            showLoading();
+        }
+    });
+
+    function showLoading() {
+        loadingDiv.style.display = 'block';
+        document.querySelector('.main-container').style.opacity = '0.7';
+    }
+
+    // Code syntax highlighting
+    const codeTextarea = document.getElementById('code');
+    codeTextarea.addEventListener('input', function() {
+        // Basic syntax highlighting could be added here
+        // For now, we'll just ensure proper formatting
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Auto-resize textarea
+    codeTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+
+{% block title %}About - AI Code Scanner{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary">
+                    <i class="fas fa-info-circle"></i> About AI Code Scanner
+                </h1>
+                <p class="lead">Understanding OWASP Top 10 Vulnerabilities and AI-Powered Detection</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title text-primary mb-4">
+                        <i class="fas fa-shield-alt"></i> What is AI Code Scanner?
+                    </h3>
+                    <p>
+                        AI Code Scanner is an advanced security tool that leverages OpenAI's powerful language models to detect 
+                        vulnerabilities in your code. It specifically focuses on identifying the OWASP Top 10 security risks, 
+                        which are the most critical web application security risks.
+                    </p>
+                    <p>
+                        Our tool provides detailed analysis including severity levels, descriptions, and actionable recommendations 
+                        to help you secure your applications effectively.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-list-ol"></i> OWASP Top 10 - 2021
+            </h2>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-unlock-alt"></i> A01:2021 – Broken Access Control
+                            </h5>
+                            <p class="card-text">
+                                Restrictions on what authenticated users are allowed to do are often not properly enforced. 
+                                Attackers can exploit these flaws to access unauthorized functionality and/or data.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">
+                                <i class="fas fa-key"></i> A02:2021 – Cryptographic Failures
+                            </h5>
+                            <p class="card-text">
+                                Failures related to cryptography which often leads to sensitive data exposure. 
+                                This includes issues with encryption, hashing, and key management.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-syringe"></i> A03:2021 – Injection
+                            </h5>
+                            <p class="card-text">
+                                Injection flaws occur when untrusted data is sent to an interpreter as part of a command or query. 
+                                SQL, NoSQL, OS, and LDAP injection vulnerabilities are common.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">
+                                <i class="fas fa-drafting-compass"></i> A04:2021 – Insecure Design
+                            </h5>
+                            <p class="card-text">
+                                Insecure design is a broad category representing different weaknesses, expressed as 
+                                "missing or ineffective control design."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">
+                                <i class="fas fa-cogs"></i> A05:2021 – Security Misconfiguration
+                            </h5>
+                            <p class="card-text">
+                                Security misconfiguration is the most commonly seen issue. This is commonly a result of 
+                                insecure default configurations, incomplete configurations, or misconfigured HTTP headers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-exclamation-triangle"></i> A06:2021 – Vulnerable and Outdated Components
+                            </h5>
+                            <p class="card-text">
+                                Components run with the same privileges as the application itself, so flaws in any component 
+                                can result in serious impact.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">
+                                <i class="fas fa-user-shield"></i> A07:2021 – Identification and Authentication Failures
+                            </h5>
+                            <p class="card-text">
+                                Confirmation of the user's identity, authentication, and session management is critical 
+                                to protect against authentication-related attacks.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">
+                                <i class="fas fa-shield-alt"></i> A08:2021 – Software and Data Integrity Failures
+                            </h5>
+                            <p class="card-text">
+                                Software and data integrity failures relate to code and infrastructure that does not protect 
+                                against integrity violations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-secondary">
+                                <i class="fas fa-eye"></i> A09:2021 – Security Logging and Monitoring Failures
+                            </h5>
+                            <p class="card-text">
+                                Logging and monitoring, coupled with missing or ineffective integration with incident response, 
+                                allows attackers to further attack systems.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">
+                                <i class="fas fa-server"></i> A10:2021 – Server-Side Request Forgery (SSRF)
+                            </h5>
+                            <p class="card-text">
+                                SSRF flaws occur whenever a web application is fetching a remote resource without validating 
+                                the user-supplied URL.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-robot"></i> How AI Detection Works
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-search"></i> Analysis Process</h5>
+                            <ul>
+                                <li>Code parsing and structure analysis</li>
+                                <li>Pattern recognition for known vulnerabilities</li>
+                                <li>Context-aware security assessment</li>
+                                <li>OWASP Top 10 category mapping</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-line"></i> Output Quality</h5>
+                            <ul>
+                                <li>Severity classification (Critical, High, Medium, Low)</li>
+                                <li>Detailed vulnerability descriptions</li>
+                                <li>Actionable remediation steps</li>
+                                <li>CWE (Common Weakness Enumeration) mapping</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="stats-card">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-code"></i> Supported Programming Languages
+                </h3>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-python fa-2x mb-2"></i>
+                            <p>Python</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-js-square fa-2x mb-2"></i>
+                            <p>JavaScript</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-java fa-2x mb-2"></i>
+                            <p>Java</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-php fa-2x mb-2"></i>
+                            <p>PHP</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fas fa-hashtag fa-2x mb-2"></i>
+                            <p>C#</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-react fa-2x mb-2"></i>
+                            <p>React/JSX</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fab fa-html5 fa-2x mb-2"></i>
+                            <p>HTML/XML</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="language-item">
+                            <i class="fas fa-database fa-2x mb-2"></i>
+                            <p>SQL</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center mt-3">
+                    <small>And many more including TypeScript, C++, Ruby, Go, and shell scripts</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-lightbulb"></i> Best Practices
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-check-circle text-success"></i> Do</h5>
+                            <ul>
+                                <li>Run scans regularly during development</li>
+                                <li>Address critical and high severity issues first</li>
+                                <li>Use the CLI tool for automated CI/CD integration</li>
+                                <li>Review and understand each vulnerability</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-times-circle text-danger"></i> Don't</h5>
+                            <ul>
+                                <li>Ignore low severity findings</li>
+                                <li>Scan code with sensitive data in production</li>
+                                <li>Rely solely on automated tools</li>
+                                <li>Skip manual security reviews</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.language-item {
+    padding: 1rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.language-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.language-item i {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.language-item p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Results - AI Code Scanner{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-search"></i> Scan Results
+                    {% if filename %}
+                        <small class="text-muted">- {{ filename }}</small>
+                    {% endif %}
+                </h2>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> New Scan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-primary">{{ total_vulns }}</h3>
+                    <p class="card-text">Total Vulnerabilities</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-success">
+                        {% if total_vulns == 0 %}
+                            <i class="fas fa-shield-alt"></i>
+                        {% else %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% endif %}
+                    </h3>
+                    <p class="card-text">
+                        {% if total_vulns == 0 %}
+                            Code is Clean
+                        {% else %}
+                            Issues Found
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-info">
+                        {% set severity_counts = {} %}
+                        {% for vuln in vulnerabilities %}
+                            {% if vuln.severity in severity_counts %}
+                                {% set _ = severity_counts.update({vuln.severity: severity_counts[vuln.severity] + 1}) %}
+                            {% else %}
+                                {% set _ = severity_counts.update({vuln.severity: 1}) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if severity_counts.get('Critical', 0) > 0 %}
+                            Critical
+                        {% elif severity_counts.get('High', 0) > 0 %}
+                            High
+                        {% elif severity_counts.get('Medium', 0) > 0 %}
+                            Medium
+                        {% elif severity_counts.get('Low', 0) > 0 %}
+                            Low
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                    <p class="card-text">Highest Severity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if total_vulns == 0 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                    <i class="fas fa-check-circle fa-2x me-3"></i>
+                    <div>
+                        <h4 class="alert-heading">Great news!</h4>
+                        <p class="mb-0">No OWASP Top 10 vulnerabilities were detected in your code. Your code appears to be secure!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Severity Summary -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie"></i> Severity Breakdown
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for severity in ['Critical', 'High', 'Medium', 'Low'] %}
+                                {% set count = vulnerabilities | selectattr('severity', 'equalto', severity) | list | length %}
+                                {% if count > 0 %}
+                                    <div class="col-md-3 mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge {{ 'severity-' + severity.lower() }} me-2">
+                                                {{ severity | get_severity_icon }}
+                                            </span>
+                                            <strong>{{ severity }}: {{ count }}</strong>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vulnerabilities List -->
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3">
+                    <i class="fas fa-bug"></i> Detailed Vulnerabilities
+                </h4>
+                
+                {% for vuln in vulnerabilities %}
+                    <div class="card vulnerability-card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge {{ vuln.severity | get_severity_class }} me-2">
+                                    {{ vuln.severity | get_severity_icon }} {{ vuln.severity }}
+                                </span>
+                                <span class="owasp-badge">{{ vuln.owasp_category }}</span>
+                            </div>
+                            {% if vuln.line_number %}
+                                <small class="text-muted">Line {{ vuln.line_number }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                                {{ vuln.owasp_category }}
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <strong>Description:</strong>
+                                <p class="mt-1">{{ vuln.description }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Recommendations:</strong>
+                                <div class="mt-1">
+                                    {% set recommendations = vuln.recommendations.split('\n') %}
+                                    {% if recommendations | length > 1 %}
+                                        <ul>
+                                            {% for rec in recommendations %}
+                                                {% if rec.strip() %}
+                                                    <li>{{ rec.strip() }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>{{ vuln.recommendations }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if vuln.code_snippet %}
+                                <div class="mb-3">
+                                    <strong>Vulnerable Code:</strong>
+                                    <pre class="bg-light p-3 rounded mt-1"><code>{{ vuln.code_snippet }}</code></pre>
+                                </div>
+                            {% endif %}
+                            
+                            {% if vuln.cwe_id %}
+                                <div class="mb-0">
+                                    <small class="text-muted">
+                                        <strong>CWE ID:</strong> {{ vuln.cwe_id }}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Code Display -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-code"></i> Analyzed Code
+                    </h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleCode()">
+                        <i class="fas fa-eye" id="toggleIcon"></i> <span id="toggleText">Show Code</span>
+                    </button>
+                </div>
+                <div class="card-body" id="codeDisplay" style="display: none;">
+                    <pre class="bg-light p-3 rounded" style="max-height: 500px; overflow-y: auto;"><code class="language-auto">{{ code }}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-download"></i> Export Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="exportToJSON()">
+                            <i class="fas fa-file-code"></i> Export as JSON
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv"></i> Export as CSV
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export as PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleCode() {
+    const codeDisplay = document.getElementById('codeDisplay');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const toggleText = document.getElementById('toggleText');
+    
+    if (codeDisplay.style.display === 'none') {
+        codeDisplay.style.display = 'block';
+        toggleIcon.className = 'fas fa-eye-slash';
+        toggleText.textContent = 'Hide Code';
+    } else {
+        codeDisplay.style.display = 'none';
+        toggleIcon.className = 'fas fa-eye';
+        toggleText.textContent = 'Show Code';
+    }
+}
+
+function exportToJSON() {
+    const vulnerabilities = {{ vulnerabilities | tojson }};
+    const data = {
+        timestamp: new Date().toISOString(),
+        total_vulnerabilities: {{ total_vulns }},
+        filename: "{{ filename or 'code_snippet' }}",
+        vulnerabilities: vulnerabilities
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vulnerability_report.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportToCSV() {
+    const vulnerabilities = {{ vulnerabilities | tojson }};
+    
+    let csv = 'Severity,OWASP Category,Description,Recommendations,Line Number,CWE ID\n';
+    
+    vulnerabilities.forEach(vuln => {
+        csv += `"${vuln.severity || ''}","${vuln.owasp_category || ''}","${(vuln.description || '').replace(/"/g, '""')}","${(vuln.recommendations || '').replace(/"/g, '""')}","${vuln.line_number || ''}","${vuln.cwe_id || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vulnerability_report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function exportToPDF() {
+    window.print();
+}
+
+// Initialize syntax highlighting
+document.addEventListener('DOMContentLoaded', function() {
+    Prism.highlightAll();
+});
+</script>
+{% endblock %}
