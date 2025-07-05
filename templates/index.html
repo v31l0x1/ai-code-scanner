@@ -4,183 +4,275 @@
 
 {% block content %}
 <div class="main-container">
-    <div class="row">
-        <div class="col-12">
-            <div class="text-center mb-5">
-                <h1 class="display-4 fw-bold text-primary">
-                    <i class="fas fa-shield-alt"></i> AI Code Scanner
-                </h1>
-                <p class="lead">Detect OWASP Top 10 vulnerabilities in your code using AI-powered analysis</p>
-            </div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1 class="chat-title">
+                <i class="fas fa-shield-alt"></i> AI Code Scanner
+            </h1>
+            <p class="chat-subtitle">Analyze code and logs for security vulnerabilities using AI</p>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-code"></i> Paste Your Code
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('scan_code') }}" id="codeForm">
-                        <div class="mb-3">
-                            <label for="code" class="form-label">Enter your code here:</label>
-                            <textarea class="form-control code-editor" id="code" name="code" rows="15" 
-                                      placeholder="Paste your code here for vulnerability analysis..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-search"></i> Scan Code
+        <div class="input-section">
+            <div class="input-tabs">
+                <button class="tab-button active" data-tab="code-tab">
+                    <i class="fas fa-code"></i> Code Analysis
+                </button>
+                <button class="tab-button" data-tab="upload-tab">
+                    <i class="fas fa-file-upload"></i> File Upload
+                </button>
+                <button class="tab-button" data-tab="log-tab">
+                    <i class="fas fa-clipboard-list"></i> Log Analysis
+                </button>
+            </div>
+
+            <!-- Code Analysis Tab -->
+            <div id="code-tab" class="tab-content active">
+                <form method="POST" action="{{ url_for('scan_code') }}" id="codeForm">
+                    <textarea class="code-input" id="code" name="code"
+                        placeholder="Paste your code here for security analysis...&#10;&#10;Supports: Python, JavaScript, Java, PHP, C#, C++, SQL, HTML, and more"></textarea>
+                    <div class="submit-section">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-search"></i> Analyze Code
                         </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-file-upload"></i> Upload File
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" id="uploadForm">
-                        <div class="upload-area" id="uploadArea">
-                            <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
-                            <h5>Drop your file here or click to browse</h5>
-                            <p class="text-muted">Supported formats: .py, .js, .java, .php, .cs, .cpp, .html, .sql and more</p>
-                            <input type="file" class="form-control" id="file" name="file" accept=".py,.js,.jsx,.ts,.tsx,.java,.php,.rb,.go,.cs,.cpp,.c,.h,.hpp,.sql,.html,.xml,.json,.yaml,.yml,.sh,.bash,.ps1,.jsp,.asp,.aspx" style="display: none;">
-                        </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100 mt-3">
-                            <i class="fas fa-upload"></i> Upload & Scan
+                        <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('code').value = ''">
+                            <i class="fas fa-trash"></i> Clear
                         </button>
-                    </form>
+                    </div>
+                </form>
+            </div>
+
+            <!-- File Upload Tab -->
+            <div id="upload-tab" class="tab-content">
+                <form method="POST" action="{{ url_for('upload_file') }}" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">
+                            Drop your file here or click to browse
+                        </div>
+                        <div class="file-info">
+                            Supported formats: .py, .js, .java, .php, .cs, .cpp, .html, .sql, .log, .txt
+                        </div>
+                        <input type="file" class="file-input" id="file" name="file"
+                            accept=".py,.js,.jsx,.ts,.tsx,.java,.php,.rb,.go,.cs,.cpp,.c,.h,.hpp,.sql,.html,.xml,.json,.yaml,.yml,.sh,.bash,.ps1,.jsp,.asp,.aspx,.log,.txt">
+                    </div>
+                    <div class="submit-section">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-upload"></i> Upload & Analyze
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="clearFile()">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Log Analysis Tab -->
+            <div id="log-tab" class="tab-content">
+                <form method="POST" action="{{ url_for('analyze_logs') }}" id="logForm">
+                    <textarea class="code-input" id="logContent" name="logContent"
+                        placeholder="Paste your log files here for security analysis...&#10;&#10;Supports: Apache, Nginx, Windows Event Logs, Application Logs, System Logs, Custom Logs"></textarea>
+                    <div class="log-types">
+                        <span class="log-type-badge">Apache Access/Error</span>
+                        <span class="log-type-badge">Nginx Logs</span>
+                        <span class="log-type-badge">Windows Event</span>
+                        <span class="log-type-badge">Application Logs</span>
+                        <span class="log-type-badge">System Logs</span>
+                        <span class="log-type-badge">Custom Logs</span>
+                    </div>
+                    <div class="submit-section">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-search"></i> Analyze Logs
+                        </button>
+                        <button type="button" class="btn-secondary"
+                            onclick="document.getElementById('logContent').value = ''">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="capabilities-section">
+            <h3 class="capabilities-title">
+                <i class="fas fa-shield-alt"></i> Security Analysis Capabilities
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A01:2021 – Broken Access Control</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A02:2021 – Cryptographic Failures</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A03:2021 – Injection Attacks</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A04:2021 – Insecure Design</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A05:2021 – Security Misconfiguration</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A06:2021 – Vulnerable Components</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A07:2021 – Authentication Failures</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A08:2021 – Data Integrity Failures</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A09:2021 – Logging & Monitoring</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>A10:2021 – Server-Side Request Forgery</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="stats-card">
-                <h3 class="text-center mb-4">
-                    <i class="fas fa-chart-bar"></i> OWASP Top 10 Detection Capabilities
-                </h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A01:2021 – Broken Access Control</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A02:2021 – Cryptographic Failures</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A03:2021 – Injection</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A04:2021 – Insecure Design</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A05:2021 – Security Misconfiguration</li>
-                        </ul>
+        <div class="log-analysis-section">
+            <h3 class="log-analysis-title">
+                <i class="fas fa-clipboard-list"></i> Log Analysis Features
+            </h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>Failed Login Attempts Detection</span>
                     </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A06:2021 – Vulnerable and Outdated Components</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A07:2021 – Identification and Authentication Failures</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A08:2021 – Software and Data Integrity Failures</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A09:2021 – Security Logging and Monitoring Failures</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success"></i> A10:2021 – Server-Side Request Forgery (SSRF)</li>
-                        </ul>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>Brute Force Attack Patterns</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>Suspicious IP Activity</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>SQL Injection Attempts</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>Anomalous Traffic Patterns</span>
+                    </div>
+                    <div class="capability-item">
+                        <i class="fas fa-check-circle capability-icon"></i>
+                        <span>Error Pattern Analysis</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="loading" id="loadingDiv">
-        <div class="spinner"></div>
-        <h5>Analyzing your code for vulnerabilities...</h5>
-        <p class="text-muted">This may take a few seconds</p>
+        <div class="loading" id="loadingDiv">
+            <div class="spinner"></div>
+            <h5>Analyzing your input for security vulnerabilities...</h5>
+            <p style="color: var(--text-secondary)">This may take a few moments</p>
+        </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.dataset.tab;
+
+            // Remove active class from all buttons and content
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding content
+            button.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // File upload functionality
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('file');
-    const codeForm = document.getElementById('codeForm');
-    const uploadForm = document.getElementById('uploadForm');
-    const loadingDiv = document.getElementById('loadingDiv');
 
-    // File upload drag and drop
-    uploadArea.addEventListener('click', function() {
+    uploadArea.addEventListener('click', () => {
         fileInput.click();
     });
 
-    uploadArea.addEventListener('dragover', function(e) {
+    uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
     });
 
-    uploadArea.addEventListener('dragleave', function(e) {
-        e.preventDefault();
+    uploadArea.addEventListener('dragleave', () => {
         uploadArea.classList.remove('dragover');
     });
 
-    uploadArea.addEventListener('drop', function(e) {
+    uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             fileInput.files = files;
-            updateUploadAreaText(files[0].name);
+            updateUploadArea(files[0]);
         }
     });
 
-    fileInput.addEventListener('change', function() {
-        if (fileInput.files.length > 0) {
-            updateUploadAreaText(fileInput.files[0].name);
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            updateUploadArea(e.target.files[0]);
         }
     });
 
-    function updateUploadAreaText(filename) {
-        uploadArea.innerHTML = `
-            <i class="fas fa-file-code fa-3x mb-3 text-primary"></i>
-            <h5>File Selected: ${filename}</h5>
-            <p class="text-muted">Click to select a different file</p>
-        `;
+    function updateUploadArea(file) {
+        const uploadIcon = uploadArea.querySelector('.upload-icon');
+        const uploadText = uploadArea.querySelector('.upload-text');
+        const fileInfo = uploadArea.querySelector('.file-info');
+
+        uploadIcon.innerHTML = '<i class="fas fa-file-alt"></i>';
+        uploadText.textContent = file.name;
+        fileInfo.textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
     }
 
-    // Show loading on form submission
-    codeForm.addEventListener('submit', function() {
-        const code = document.getElementById('code').value.trim();
-        if (code) {
-            showLoading();
-        }
-    });
+    function clearFile() {
+        const fileInput = document.getElementById('file');
+        const uploadArea = document.getElementById('uploadArea');
 
-    uploadForm.addEventListener('submit', function() {
-        if (fileInput.files.length > 0) {
-            showLoading();
-        }
-    });
+        fileInput.value = '';
 
-    function showLoading() {
-        loadingDiv.style.display = 'block';
-        document.querySelector('.main-container').style.opacity = '0.7';
+        uploadArea.querySelector('.upload-icon').innerHTML = '<i class="fas fa-cloud-upload-alt"></i>';
+        uploadArea.querySelector('.upload-text').textContent = 'Drop your file here or click to browse';
+        uploadArea.querySelector('.file-info').textContent = 'Supported formats: .py, .js, .java, .php, .cs, .cpp, .html, .sql, .log, .txt';
     }
 
-    // Code syntax highlighting
-    const codeTextarea = document.getElementById('code');
-    codeTextarea.addEventListener('input', function() {
-        // Basic syntax highlighting could be added here
-        // For now, we'll just ensure proper formatting
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
+    // Loading animation
+    document.getElementById('codeForm').addEventListener('submit', () => {
+        document.getElementById('loadingDiv').style.display = 'block';
     });
 
-    // Auto-resize textarea
-    codeTextarea.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
+    document.getElementById('uploadForm').addEventListener('submit', () => {
+        document.getElementById('loadingDiv').style.display = 'block';
     });
-});
+
+    document.getElementById('logForm').addEventListener('submit', () => {
+        document.getElementById('loadingDiv').style.display = 'block';
+    });
 </script>
 {% endblock %}

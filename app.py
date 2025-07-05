@@ -242,6 +242,69 @@ def get_severity_icon(severity):
     }
     return icons.get(severity, '❓')
 
+@app.route('/analyze-logs', methods=['POST'])
+def analyze_logs():
+    """Analyze log files for security threats"""
+    try:
+        if scanner is None:
+            flash('Scanner not initialized. Please check your Gemini API key.', 'error')
+            return redirect(url_for('index'))
+        
+        # Get log content from form
+        log_content = request.form.get('logContent', '').strip()
+        
+        if not log_content:
+            flash('Please enter some log content to analyze', 'error')
+            return redirect(url_for('index'))
+        
+        # Analyze logs
+        result = scanner.analyze_logs(log_content)
+        
+        if 'error' in result:
+            flash(f'Log analysis failed: {result["error"]}', 'error')
+            return redirect(url_for('index'))
+        
+        # Process results for display
+        threats = result.get('threats', [])
+        
+        return render_template('log_results.html', 
+                             threats=threats,
+                             log_content=log_content,
+                             total_threats=len(threats))
+        
+    except Exception as e:
+        logger.error(f"Error during log analysis: {str(e)}")
+        flash(f'An error occurred: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/api/analyze-logs', methods=['POST'])
+def api_analyze_logs():
+    """API endpoint for log analysis"""
+    try:
+        if scanner is None:
+            return jsonify({'error': 'Scanner not initialized. Please check your Gemini API key.'}), 500
+        
+        data = request.get_json()
+        
+        if not data or 'logContent' not in data:
+            return jsonify({'error': 'No log content provided'}), 400
+        
+        log_content = data['logContent'].strip()
+        if not log_content:
+            return jsonify({'error': 'Empty log content provided'}), 400
+        
+        # Analyze logs
+        result = scanner.analyze_logs(log_content)
+        
+        if 'error' in result:
+            return jsonify({'error': result['error']}), 500
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"API log analysis error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     # Check if Gemini API key is set
     if not os.getenv('GEMINI_API_KEY'):

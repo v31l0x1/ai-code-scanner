@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Scan Results - AI Code Scanner{% endblock %}
+{% block title %}Log Analysis Results - AI Code Scanner{% endblock %}
 
 {% block content %}
 <div class="main-container">
@@ -8,10 +8,7 @@
         <div class="chat-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="chat-title" style="font-size: 2rem;">
-                    <i class="fas fa-search"></i> Analysis Results
-                    {% if filename %}
-                    <small style="color: var(--text-secondary); font-size: 0.6em;">{{ filename }}</small>
-                    {% endif %}
+                    <i class="fas fa-clipboard-list"></i> Log Analysis Results
                 </h2>
                 <a href="{{ url_for('index') }}" class="btn-primary" style="text-decoration: none;">
                     <i class="fas fa-arrow-left"></i> New Analysis
@@ -23,25 +20,25 @@
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="vulnerability-card text-center">
-                    <h3 style="color: var(--accent-color); font-size: 2rem; margin-bottom: 0.5rem;">{{ total_vulns }}
+                    <h3 style="color: var(--accent-color); font-size: 2rem; margin-bottom: 0.5rem;">{{ total_threats }}
                     </h3>
-                    <p style="color: var(--text-secondary);">Total Vulnerabilities</p>
+                    <p style="color: var(--text-secondary);">Total Threats</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="vulnerability-card text-center">
                     <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">
-                        {% if total_vulns == 0 %}
+                        {% if total_threats == 0 %}
                         <i class="fas fa-shield-alt" style="color: var(--success-color);"></i>
                         {% else %}
                         <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>
                         {% endif %}
                     </h3>
                     <p style="color: var(--text-secondary);">
-                        {% if total_vulns == 0 %}
-                        Code is Clean
+                        {% if total_threats == 0 %}
+                        Logs are Clean
                         {% else %}
-                        Issues Found
+                        Threats Found
                         {% endif %}
                     </p>
                 </div>
@@ -50,11 +47,11 @@
                 <div class="vulnerability-card text-center">
                     <h3 style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--text-primary);">
                         {% set severity_counts = {} %}
-                        {% for vuln in vulnerabilities %}
-                        {% if vuln.severity in severity_counts %}
-                        {% set _ = severity_counts.update({vuln.severity: severity_counts[vuln.severity] + 1}) %}
+                        {% for threat in threats %}
+                        {% if threat.severity in severity_counts %}
+                        {% set _ = severity_counts.update({threat.severity: severity_counts[threat.severity] + 1}) %}
                         {% else %}
-                        {% set _ = severity_counts.update({vuln.severity: 1}) %}
+                        {% set _ = severity_counts.update({threat.severity: 1}) %}
                         {% endif %}
                         {% endfor %}
                         {% if severity_counts.get('Critical', 0) > 0 %}
@@ -74,29 +71,33 @@
             </div>
         </div>
 
-        {% if total_vulns == 0 %}
+        {% if total_threats == 0 %}
         <div class="alert alert-success d-flex align-items-center" role="alert">
             <i class="fas fa-check-circle fa-2x me-3"></i>
             <div>
                 <h4 class="alert-heading">Great news!</h4>
-                <p class="mb-0">No OWASP Top 10 vulnerabilities were detected in your code. Your code appears to be
+                <p class="mb-0">No security threats or anomalies were detected in your logs. Your system appears to be
                     secure!</p>
             </div>
         </div>
         {% else %}
-        <!-- Severity Summary -->
+        <!-- Threat Types Summary -->
         <div class="vulnerability-card mb-4">
             <h5 class="vulnerability-title">
-                <i class="fas fa-chart-pie"></i> Severity Breakdown
+                <i class="fas fa-chart-pie"></i> Threat Breakdown
             </h5>
             <div class="row">
                 {% for severity in ['Critical', 'High', 'Medium', 'Low'] %}
-                {% set count = vulnerabilities | selectattr('severity', 'equalto', severity) | list | length %}
+                {% set count = threats | selectattr('severity', 'equalto', severity) | list | length %}
                 {% if count > 0 %}
                 <div class="col-md-3 mb-2">
                     <div class="d-flex align-items-center">
                         <span class="severity-badge {{ 'severity-' + severity.lower() }} me-2">
-                            {{ severity | get_severity_icon }}
+                            {% if severity == 'Critical' %}🚨
+                            {% elif severity == 'High' %}⚠️
+                            {% elif severity == 'Medium' %}⚡
+                            {% elif severity == 'Low' %}ℹ️
+                            {% endif %}
                         </span>
                         <strong style="color: var(--text-primary);">{{ severity }}: {{ count }}</strong>
                     </div>
@@ -106,85 +107,87 @@
             </div>
         </div>
 
-        <!-- Vulnerabilities List -->
+        <!-- Threats List -->
         <h4 class="vulnerability-title mb-3">
-            <i class="fas fa-bug"></i> Detailed Vulnerabilities
+            <i class="fas fa-shield-alt"></i> Detected Threats
         </h4>
 
-        {% for vuln in vulnerabilities %}
+        {% for threat in threats %}
         <div class="vulnerability-card mb-4">
             <div class="vulnerability-header">
                 <div>
-                    <span class="severity-badge {{ vuln.severity | get_severity_class }} me-2">
-                        {{ vuln.severity | get_severity_icon }} {{ vuln.severity }}
+                    <span class="severity-badge {{ 'severity-' + threat.severity.lower() }} me-2">
+                        {% if threat.severity == 'Critical' %}🚨
+                        {% elif threat.severity == 'High' %}⚠️
+                        {% elif threat.severity == 'Medium' %}⚡
+                        {% elif threat.severity == 'Low' %}ℹ️
+                        {% endif %}
+                        {{ threat.severity }}
                     </span>
-                    <span class="owasp-badge">{{ vuln.owasp_category }}</span>
                 </div>
-                {% if vuln.line_number %}
-                <small style="color: var(--text-muted);">Line {{ vuln.line_number }}</small>
-                {% endif %}
             </div>
 
             <h6 class="vulnerability-title">
-                <i class="fas fa-exclamation-triangle" style="color: var(--warning-color);"></i>
-                {{ vuln.owasp_category }}
+                <i class="fas fa-bug" style="color: var(--warning-color);"></i>
+                {{ threat.threat_type }}
             </h6>
 
             <div class="mb-3">
                 <strong style="color: var(--text-primary);">Description:</strong>
-                <p class="mt-1" style="color: var(--text-secondary);">{{ vuln.description }}</p>
+                <p class="mt-1" style="color: var(--text-secondary);">{{ threat.description }}</p>
             </div>
 
+            {% if threat.log_entries %}
             <div class="mb-3">
-                <strong style="color: var(--text-primary);">Recommendations:</strong>
-                <div class="mt-1">
-                    {% set recommendations = vuln.recommendations.split('\n') %}
-                    {% if recommendations | length > 1 %}
-                    <ul style="color: var(--text-secondary);">
-                        {% for rec in recommendations %}
-                        {% if rec.strip() %}
-                        <li>{{ rec.strip() }}</li>
-                        {% endif %}
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p style="color: var(--text-secondary);">{{ vuln.recommendations }}</p>
-                    {% endif %}
+                <strong style="color: var(--text-primary);">Suspicious Log Entries:</strong>
+                <div
+                    style="background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-top: 0.5rem;">
+                    {% for entry in threat.log_entries %}
+                    <div
+                        style="color: var(--text-primary); font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; margin-bottom: 0.5rem;">
+                        {{ entry }}</div>
+                    {% endfor %}
                 </div>
-            </div>
-
-            {% if vuln.code_snippet %}
-            <div class="mb-3">
-                <strong style="color: var(--text-primary);">Vulnerable Code:</strong>
-                <pre
-                    style="background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; margin-top: 0.5rem; overflow-x: auto;"><code style="color: var(--text-primary); font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;">{{ vuln.code_snippet }}</code></pre>
             </div>
             {% endif %}
 
-            {% if vuln.cwe_id %}
+            <div class="mb-3">
+                <strong style="color: var(--text-primary);">Recommendations:</strong>
+                <p class="mt-1" style="color: var(--text-secondary);">{{ threat.recommendations }}</p>
+            </div>
+
+            <div class="mb-3">
+                <strong style="color: var(--text-primary);">Potential Impact:</strong>
+                <p class="mt-1" style="color: var(--text-secondary);">{{ threat.impact }}</p>
+            </div>
+
+            {% if threat.iocs %}
             <div class="mb-0">
-                <small style="color: var(--text-muted);">
-                    <strong>CWE ID:</strong> {{ vuln.cwe_id }}
-                </small>
+                <strong style="color: var(--text-primary);">Indicators of Compromise (IoCs):</strong>
+                <div class="mt-1">
+                    {% for ioc in threat.iocs %}
+                    <span class="owasp-badge" style="margin-right: 0.5rem;">{{ ioc }}</span>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
         </div>
         {% endfor %}
         {% endif %}
 
-        <!-- Code Display -->
+        <!-- Log Content Display -->
         <div class="vulnerability-card mt-4">
             <div class="vulnerability-header">
                 <h5 class="vulnerability-title">
-                    <i class="fas fa-code"></i> Analyzed Code
+                    <i class="fas fa-file-alt"></i> Analyzed Log Content
                 </h5>
-                <button class="btn-secondary" onclick="toggleCode()">
-                    <i class="fas fa-eye" id="toggleIcon"></i> <span id="toggleText">Show Code</span>
+                <button class="btn-secondary" onclick="toggleLogs()">
+                    <i class="fas fa-eye" id="toggleLogsIcon"></i> <span id="toggleLogsText">Show Logs</span>
                 </button>
             </div>
-            <div id="codeDisplay" style="display: none;">
+            <div id="logDisplay" style="display: none;">
                 <pre
-                    style="background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; max-height: 500px; overflow-y: auto; margin-top: 1rem;"><code style="color: var(--text-primary); font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;">{{ code }}</code></pre>
+                    style="background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px; max-height: 500px; overflow-y: auto; margin-top: 1rem;"><code style="color: var(--text-primary); font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;">{{ log_content }}</code></pre>
             </div>
         </div>
 
@@ -211,56 +214,57 @@
 
 {% block scripts %}
 <script>
-    function toggleCode() {
-        const codeDisplay = document.getElementById('codeDisplay');
-        const toggleIcon = document.getElementById('toggleIcon');
-        const toggleText = document.getElementById('toggleText');
+    function toggleLogs() {
+        const logDisplay = document.getElementById('logDisplay');
+        const toggleIcon = document.getElementById('toggleLogsIcon');
+        const toggleText = document.getElementById('toggleLogsText');
 
-        if (codeDisplay.style.display === 'none') {
-            codeDisplay.style.display = 'block';
+        if (logDisplay.style.display === 'none') {
+            logDisplay.style.display = 'block';
             toggleIcon.className = 'fas fa-eye-slash';
-            toggleText.textContent = 'Hide Code';
+            toggleText.textContent = 'Hide Logs';
         } else {
-            codeDisplay.style.display = 'none';
+            logDisplay.style.display = 'none';
             toggleIcon.className = 'fas fa-eye';
-            toggleText.textContent = 'Show Code';
+            toggleText.textContent = 'Show Logs';
         }
     }
 
     function exportToJSON() {
-        const vulnerabilities = {{ vulnerabilities | tojson
+        const threats = {{ threats | tojson
     }};
     const data = {
         timestamp: new Date().toISOString(),
-        total_vulnerabilities: {{ total_vulns }},
-    filename: "{{ filename or 'code_snippet' }}",
-        vulnerabilities: vulnerabilities
+        total_threats: {{ total_threats }},
+    analysis_type: 'log_analysis',
+        threats: threats
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'vulnerability_report.json';
+    a.download = 'log_analysis_report.json';
     a.click();
     URL.revokeObjectURL(url);
 }
 
     function exportToCSV() {
-        const vulnerabilities = {{ vulnerabilities | tojson
+        const threats = {{ threats | tojson
     }};
 
-    let csv = 'Severity,OWASP Category,Description,Recommendations,Line Number,CWE ID\n';
+    let csv = 'Threat Type,Severity,Description,Recommendations,Impact,IoCs\n';
 
-    vulnerabilities.forEach(vuln => {
-        csv += `"${vuln.severity || ''}","${vuln.owasp_category || ''}","${(vuln.description || '').replace(/"/g, '""')}","${(vuln.recommendations || '').replace(/"/g, '""')}","${vuln.line_number || ''}","${vuln.cwe_id || ''}"\n`;
+    threats.forEach(threat => {
+        const iocs = threat.iocs ? threat.iocs.join('; ') : '';
+        csv += `"${threat.threat_type || ''}","${threat.severity || ''}","${(threat.description || '').replace(/"/g, '""')}","${(threat.recommendations || '').replace(/"/g, '""')}","${(threat.impact || '').replace(/"/g, '""')}","${iocs.replace(/"/g, '""')}"\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'vulnerability_report.csv';
+    a.download = 'log_analysis_report.csv';
     a.click();
     URL.revokeObjectURL(url);
 }

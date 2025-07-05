@@ -3,6 +3,7 @@ import json
 import logging
 from typing import List, Dict, Optional
 import google.generativeai as genai
+# from google import genai
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -224,3 +225,121 @@ Be thorough and provide actionable recommendations.
             },
             "detailed_results": results
         }
+    
+    def analyze_logs(self, log_content: str) -> Dict:
+        """
+        Analyze log files for security threats and anomalies
+        """
+        try:
+            log_analysis_prompt = self.create_log_analysis_prompt(log_content)
+            
+            response = self.model.generate_content(log_analysis_prompt)
+            
+            if not response.text:
+                return {"error": "No response from Gemini API"}
+            
+            # Parse the response
+            return self.parse_log_analysis_response(response.text)
+            
+        except Exception as e:
+            self.logger.error(f"Error analyzing logs: {str(e)}")
+            return {"error": str(e)}
+
+    def create_log_analysis_prompt(self, log_content: str) -> str:
+        """Create a detailed prompt for log analysis"""
+        return f"""
+You are a cybersecurity expert specializing in log analysis. Analyze the following log content for security threats, anomalies, and potential attack patterns.
+
+Log content to analyze:
+```
+{log_content}
+```
+
+Please analyze the logs and identify:
+1. Failed login attempts and potential brute force attacks
+2. Suspicious IP addresses or unusual access patterns
+3. SQL injection attempts
+4. XSS (Cross-Site Scripting) attempts
+5. Command injection attempts
+6. Unusual HTTP status codes or error patterns
+7. Potential data exfiltration attempts
+8. Anomalous traffic patterns
+9. Authentication bypass attempts
+10. Privilege escalation attempts
+
+For each threat found, provide:
+- Threat type and severity (Critical, High, Medium, Low)
+- Description of the threat
+- Specific log entries or patterns that indicate the threat
+- Recommendations for mitigation
+- Potential impact
+- Indicators of compromise (IoCs) if applicable
+
+Format your response as a JSON object with this structure:
+{{
+    "threats": [
+        {{
+            "threat_type": "string",
+            "severity": "Critical|High|Medium|Low",
+            "description": "string",
+            "log_entries": ["string"],
+            "recommendations": "string",
+            "impact": "string",
+            "iocs": ["string"]
+        }}
+    ],
+    "summary": {{
+        "total_threats": number,
+        "critical_threats": number,
+        "high_threats": number,
+        "medium_threats": number,
+        "low_threats": number,
+        "analysis_date": "string"
+    }}
+}}
+
+If no threats are found, return:
+{{
+    "threats": [],
+    "summary": {{
+        "total_threats": 0,
+        "critical_threats": 0,
+        "high_threats": 0,
+        "medium_threats": 0,
+        "low_threats": 0,
+        "analysis_date": "string"
+    }}
+}}
+
+Only return the JSON object, no other text.
+"""
+
+    def parse_log_analysis_response(self, response_text: str) -> Dict:
+        """Parse the log analysis response from Gemini"""
+        try:
+            # Clean up the response text
+            response_text = response_text.strip()
+            
+            # Remove markdown code blocks if present
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.startswith('```'):
+                response_text = response_text[3:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            
+            # Parse JSON
+            parsed_response = json.loads(response_text.strip())
+            
+            # Validate structure
+            if 'threats' not in parsed_response:
+                return {"error": "Invalid response format - missing 'threats' key"}
+            
+            return parsed_response
+            
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse log analysis response: {str(e)}")
+            return {"error": f"Failed to parse AI response: {str(e)}"}
+        except Exception as e:
+            self.logger.error(f"Error parsing log analysis response: {str(e)}")
+            return {"error": str(e)}
