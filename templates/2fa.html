@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-container">
+    <h2>Two-Factor Authentication</h2>
+    {% if registration %}
+        <div style="text-align:center; margin-bottom:1em;">
+            <p>Scan this QR code with your authenticator app:</p>
+            <img src="{{ qr_code }}" alt="2FA QR Code" style="width:200px;height:200px;display:block;margin:0 auto 1em auto;">
+            <p>Or enter this secret manually: <b>{{ totp_secret }}</b></p>
+            <p style="margin-top:1em;">After setting up, <a href="{{ url_for('login') }}">Login here</a>.</p>
+        </div>
+    {% else %}
+        <form method="post">
+            <div class="form-group">
+                <label for="code">Enter 2FA Code:</label>
+                <input type="text" name="code" id="code" required autocomplete="one-time-code">
+            </div>
+            <button type="submit" class="btn-main">Verify</button>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}
